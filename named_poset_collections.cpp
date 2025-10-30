@@ -10,40 +10,40 @@
 #endif
 
 namespace {
-// Typ reprezentujący relację jako macierz sąsiedztwa
+// Type representing a relation as an adjacency matrix
 using Relation = std::array<std::bitset<N>, N>;
 
-// Typ reprezentujący zbiór częściowo uporządkowany
+// Type representing a partially ordered set
 struct Poset {
     Relation relation;
 
     Poset() {
-        // Inicjalizacja relacją zwrotną
+        // Initialize with reflexive relation
         for (size_t i = 0; i < N; ++i) {
             relation[i].set(i);
         }
     }
 };
 
-// Typ reprezentujący kolekcję zbiorów częściowo uporządkowanych
+// Type representing a collection of partially ordered sets
 using PosetCollection = std::map<std::string, Poset>;
 
-// Mapa wszystkich kolekcji
+// Map of all collections
 using CollectionsMap = std::map<long, PosetCollection>;
 
-// Funkcja zwracająca statyczną mapę kolekcji (rozwiązanie SIOF)
+// Function returning static collections map (SIOF solution)
 CollectionsMap &get_collections() {
     static CollectionsMap collections;
     return collections;
 }
 
-// Licznik identyfikatorów
+// ID counter
 long &get_next_id() {
     static long next_id = 0;
     return next_id;
 }
 
-// Sprawdza poprawność nazwy
+// Validates name correctness
 bool is_valid_name(char const *name) {
     if (name == nullptr || name[0] == '\0') {
         return false;
@@ -60,7 +60,7 @@ bool is_valid_name(char const *name) {
     return true;
 }
 
-// Domknięcie przechodnie relacji
+// Transitive closure of relation
 void transitive_closure(Relation &rel) {
     for (size_t k = 0; k < N; ++k) {
         for (size_t i = 0; i < N; ++i) {
@@ -273,7 +273,7 @@ bool npc_remove_relation(long id, char const *name, size_t x, size_t y) {
         return false;
     }
 
-    // Sprawdź czy istnieje element pośredni
+    // Check if intermediate element exists
     for (size_t z = 0; z < N; ++z) {
         if (z != x && z != y && rel[x][z] && rel[z][y]) {
             return false;
