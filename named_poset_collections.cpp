@@ -43,6 +43,12 @@ long &get_next_id() {
     return next_id;
 }
 
+// Cache for iterator results to prevent dangling pointers
+std::string &get_iterator_cache() {
+    static std::string cache;
+    return cache;
+}
+
 // Validates name correctness
 bool is_valid_name(char const *name) {
     if (name == nullptr || name[0] == '\0') {
@@ -70,6 +76,18 @@ void transitive_closure(Relation &rel) {
         }
     }
 }
+
+// Check if relation satisfies antisymmetry
+bool is_antisymmetric(const Relation &rel) {
+    for (size_t i = 0; i < N; ++i) {
+        for (size_t j = i + 1; j < N; ++j) {
+            if (rel[i][j] && rel[j][i]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 } // namespace
 
 namespace cxx {
@@ -78,7 +96,8 @@ extern "C" {
 long npc_new_collection() {
     long &next_id = get_next_id();
 
-    if (next_id > LONG_MAX) {
+    // Check for overflow before incrementing
+    if (next_id == LONG_MAX) {
         return -1;
     }
 
@@ -162,7 +181,9 @@ char const *npc_first_poset(long id) {
         return nullptr;
     }
 
-    return coll_it->second.begin()->first.c_str();
+    // Cache the string to prevent dangling pointer
+    get_iterator_cache() = coll_it->second.begin()->first;
+    return get_iterator_cache().c_str();
 }
 
 char const *npc_next_poset(long id, char const *name) {
@@ -190,7 +211,9 @@ char const *npc_next_poset(long id, char const *name) {
         return nullptr;
     }
 
-    return it->first.c_str();
+    // Cache the string to prevent dangling pointer
+    get_iterator_cache() = it->first;
+    return get_iterator_cache().c_str();
 }
 
 bool npc_add_relation(long id, char const *name, size_t x, size_t y) {
@@ -215,12 +238,23 @@ bool npc_add_relation(long id, char const *name, size_t x, size_t y) {
 
     auto &rel = poset_it->second.relation;
 
+    // Relation already exists
     if (rel[x][y]) {
         return false;
     }
 
-    rel[x].set(y);
-    transitive_closure(rel);
+    // Simulate adding relation and transitive closure
+    Relation temp_rel = rel;
+    temp_rel[x].set(y);
+    transitive_closure(temp_rel);
+
+    // Check if the result would be antisymmetric
+    if (!is_antisymmetric(temp_rel)) {
+        return false;
+    }
+
+    // Accept changes
+    rel = temp_rel;
     return true;
 }
 
