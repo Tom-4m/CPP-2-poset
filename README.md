@@ -7,7 +7,6 @@
 | `named_poset_collections.cpp` | Implementacja funkcji modułu. |
 | `named_poset_collections_example_1.c` | Przykład użycia modułu w języku C. |
 | `named_poset_collections_example_2.cpp` | Przykład użycia modułu w języku C++. |
-| `main.cpp` | Opcjonalny plik testowy / demonstracyjny (jeśli istnieje). |
 
 ## Kompilacja
 
