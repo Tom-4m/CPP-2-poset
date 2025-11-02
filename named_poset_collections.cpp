@@ -51,18 +51,7 @@ PosetCollection *find_collection(long id) {
     return it == collections.end() ? nullptr : &it->second;
 }
 
-// Finds a collection by ID
-PosetCollection *find_collection(long id) {
-    auto &collections = get_collections();
-    const auto it = collections.find(id);
-
-    return it == collections.end() ? nullptr : &it->second;
-}
-
-// Validates name correctness
-=======
 // Checks if name contains only allowed characters: [a-zA-Z0-9_].
->>>>>>> 376d5a7 (fixed errors of cache)
 bool is_valid_name(char const *name) {
     if (name == nullptr || name[0] == '\0') {
         return false;
@@ -132,10 +121,6 @@ bool npc_new_poset(long id, char const *name) {
         return false;
     }
 
-<<<<<<< HEAD
-    const std::string name_str(name);
-=======
->>>>>>> 376d5a7 (fixed errors of cache)
     auto &collection = *collection_ptr;
 
     // Poset name must be unique within collection.
@@ -157,11 +142,7 @@ void npc_delete_poset(long id, char const *name) {
         return;
     }
 
-<<<<<<< HEAD
-    collection_ptr->erase(std::string(name));
-=======
     collection_ptr->erase(name);
->>>>>>> 376d5a7 (fixed errors of cache)
 }
 
 bool npc_copy_poset(long id, char const *name_dst, char const *name_src) {
@@ -175,24 +156,14 @@ bool npc_copy_poset(long id, char const *name_dst, char const *name_src) {
     }
 
     auto &collection = *collection_ptr;
-<<<<<<< HEAD
-    const std::string src_str(name_src);
-    const auto src_it = collection.find(src_str);
-=======
     const auto src_it = collection.find(name_src);
->>>>>>> 376d5a7 (fixed errors of cache)
 
     if (src_it == collection.end()) {
         return false;
     }
 
-<<<<<<< HEAD
-    const std::string dst_str(name_dst);
-    collection[dst_str] = src_it->second;
-=======
     // Overwrites destination if it already exists.
     collection[name_dst] = src_it->second;
->>>>>>> 376d5a7 (fixed errors of cache)
     return true;
 }
 
@@ -202,14 +173,8 @@ char const *npc_first_poset(long id) {
         return nullptr;
     }
 
-<<<<<<< HEAD
-    // Cache the string to prevent dangling pointer
-    get_iterator_cache() = collection_ptr->begin()->first;
-    return get_iterator_cache().c_str();
-=======
     // Safe: string lives in map until element is removed.
     return collection_ptr->begin()->first.c_str();
->>>>>>> 376d5a7 (fixed errors of cache)
 }
 
 char const *npc_next_poset(long id, char const *name) {
@@ -223,23 +188,6 @@ char const *npc_next_poset(long id, char const *name) {
     }
 
     auto &collection = *collection_ptr;
-<<<<<<< HEAD
-    const std::string name_str(name);
-    auto poset_it = collection.find(name_str);
-
-    if (poset_it == collection.end()) {
-        return nullptr;
-    }
-
-    ++poset_it;
-    if (poset_it == collection.end()) {
-        return nullptr;
-    }
-
-    // Cache the string to prevent dangling pointer
-    get_iterator_cache() = poset_it->first;
-    return get_iterator_cache().c_str();
-=======
     auto poset_it = collection.find(name);
 
     if (poset_it == collection.end()) {
@@ -253,7 +201,6 @@ char const *npc_next_poset(long id, char const *name) {
 
     // Safe: string lives in map until element is removed.
     return poset_it->first.c_str();
->>>>>>> 376d5a7 (fixed errors of cache)
 }
 
 bool npc_add_relation(long id, char const *name, size_t x, size_t y) {
@@ -267,12 +214,7 @@ bool npc_add_relation(long id, char const *name, size_t x, size_t y) {
     }
 
     auto &collection = *collection_ptr;
-<<<<<<< HEAD
-    const std::string name_str(name);
-    const auto poset_it = collection.find(name_str);
-=======
     const auto poset_it = collection.find(name);
->>>>>>> 376d5a7 (fixed errors of cache)
 
     if (poset_it == collection.end()) {
         return false;
@@ -308,12 +250,7 @@ bool npc_is_relation(long id, char const *name, size_t x, size_t y) {
     }
 
     auto &collection = *collection_ptr;
-<<<<<<< HEAD
-    const std::string name_str(name);
-    const auto poset_it = collection.find(name_str);
-=======
     const auto poset_it = collection.find(name);
->>>>>>> 376d5a7 (fixed errors of cache)
 
     if (poset_it == collection.end()) {
         return false;
@@ -333,12 +270,7 @@ bool npc_remove_relation(long id, char const *name, size_t x, size_t y) {
     }
 
     auto &collection = *collection_ptr;
-<<<<<<< HEAD
-    const std::string name_str(name);
-    const auto poset_it = collection.find(name_str);
-=======
     const auto poset_it = collection.find(name);
->>>>>>> 376d5a7 (fixed errors of cache)
 
     if (poset_it == collection.end()) {
         return false;
