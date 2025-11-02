@@ -10,43 +10,45 @@
 #endif
 
 namespace {
-// Type representing a relation as an adjacency matrix
+// Adjacency matrix representation of a relation.
 using Relation = std::array<std::bitset<N>, N>;
 
-// Type representing a partially ordered set
+// A partially ordered set with its relation.
 struct Poset {
     Relation relation;
 
     Poset() {
-        // Initialize with reflexive relation
+        // Reflexive relation: (i, i) for all i.
         for (size_t i = 0; i < N; ++i) {
             relation[i].set(i);
         }
     }
 };
 
-// Type representing a collection of partially ordered sets
+// Collection maps poset names to their data.
+// std::map guarantees that pointers to keys remain stable
 using PosetCollection = std::map<std::string, Poset>;
 
-// Map of all collections
+// Global storage for all collections.
 using CollectionsMap = std::map<long, PosetCollection>;
 
-// Function returning static collections map (SIOF solution)
+// Avoids static initialization order fiasco.
 CollectionsMap &get_collections() {
     static CollectionsMap collections;
     return collections;
 }
 
-// ID counter
+// Generates unique collection identifiers.
 long &get_next_id() {
     static long next_id = 0;
     return next_id;
 }
 
-// Cache for iterator results to prevent dangling pointers
-std::string &get_iterator_cache() {
-    static std::string cache;
-    return cache;
+// Returns pointer to collection or nullptr if not found.
+PosetCollection *find_collection(long id) {
+    auto &collections = get_collections();
+    const auto it = collections.find(id);
+    return it == collections.end() ? nullptr : &it->second;
 }
 
 // Finds a collection by ID
@@ -58,6 +60,9 @@ PosetCollection *find_collection(long id) {
 }
 
 // Validates name correctness
+=======
+// Checks if name contains only allowed characters: [a-zA-Z0-9_].
+>>>>>>> 376d5a7 (fixed errors of cache)
 bool is_valid_name(char const *name) {
     if (name == nullptr || name[0] == '\0') {
         return false;
@@ -74,7 +79,7 @@ bool is_valid_name(char const *name) {
     return true;
 }
 
-// Transitive closure of relation
+// Computes transitive closure using Floyd-Warshall algorithm.
 void transitive_closure(Relation &rel) {
     for (size_t k = 0; k < N; ++k) {
         for (size_t i = 0; i < N; ++i) {
@@ -85,7 +90,7 @@ void transitive_closure(Relation &rel) {
     }
 }
 
-// Check if relation satisfies antisymmetry
+// Verifies antisymmetry: if (i,j) and (j,i) exist, then i == j.
 bool is_antisymmetric(const Relation &rel) {
     for (size_t i = 0; i < N; ++i) {
         for (size_t j = i + 1; j < N; ++j) {
@@ -104,7 +109,6 @@ namespace cxx {
 long npc_new_collection() {
     long &next_id = get_next_id();
 
-    // Check for overflow before incrementing
     if (next_id == LONG_MAX) {
         return -1;
     }
@@ -128,14 +132,18 @@ bool npc_new_poset(long id, char const *name) {
         return false;
     }
 
+<<<<<<< HEAD
     const std::string name_str(name);
+=======
+>>>>>>> 376d5a7 (fixed errors of cache)
     auto &collection = *collection_ptr;
 
-    if (collection.find(name_str) != collection.end()) {
+    // Poset name must be unique within collection.
+    if (collection.find(name) != collection.end()) {
         return false;
     }
 
-    collection[name_str] = Poset();
+    collection[name] = Poset();
     return true;
 }
 
@@ -149,7 +157,11 @@ void npc_delete_poset(long id, char const *name) {
         return;
     }
 
+<<<<<<< HEAD
     collection_ptr->erase(std::string(name));
+=======
+    collection_ptr->erase(name);
+>>>>>>> 376d5a7 (fixed errors of cache)
 }
 
 bool npc_copy_poset(long id, char const *name_dst, char const *name_src) {
@@ -163,15 +175,24 @@ bool npc_copy_poset(long id, char const *name_dst, char const *name_src) {
     }
 
     auto &collection = *collection_ptr;
+<<<<<<< HEAD
     const std::string src_str(name_src);
     const auto src_it = collection.find(src_str);
+=======
+    const auto src_it = collection.find(name_src);
+>>>>>>> 376d5a7 (fixed errors of cache)
 
     if (src_it == collection.end()) {
         return false;
     }
 
+<<<<<<< HEAD
     const std::string dst_str(name_dst);
     collection[dst_str] = src_it->second;
+=======
+    // Overwrites destination if it already exists.
+    collection[name_dst] = src_it->second;
+>>>>>>> 376d5a7 (fixed errors of cache)
     return true;
 }
 
@@ -181,9 +202,14 @@ char const *npc_first_poset(long id) {
         return nullptr;
     }
 
+<<<<<<< HEAD
     // Cache the string to prevent dangling pointer
     get_iterator_cache() = collection_ptr->begin()->first;
     return get_iterator_cache().c_str();
+=======
+    // Safe: string lives in map until element is removed.
+    return collection_ptr->begin()->first.c_str();
+>>>>>>> 376d5a7 (fixed errors of cache)
 }
 
 char const *npc_next_poset(long id, char const *name) {
@@ -197,21 +223,37 @@ char const *npc_next_poset(long id, char const *name) {
     }
 
     auto &collection = *collection_ptr;
+<<<<<<< HEAD
     const std::string name_str(name);
     auto poset_it = collection.find(name_str);
 
-    if (poset_it  == collection.end()) {
+    if (poset_it == collection.end()) {
         return nullptr;
     }
 
-    ++poset_it ;
-    if (poset_it  == collection.end()) {
+    ++poset_it;
+    if (poset_it == collection.end()) {
         return nullptr;
     }
 
     // Cache the string to prevent dangling pointer
     get_iterator_cache() = poset_it->first;
     return get_iterator_cache().c_str();
+=======
+    auto poset_it = collection.find(name);
+
+    if (poset_it == collection.end()) {
+        return nullptr;
+    }
+
+    ++poset_it;
+    if (poset_it == collection.end()) {
+        return nullptr;
+    }
+
+    // Safe: string lives in map until element is removed.
+    return poset_it->first.c_str();
+>>>>>>> 376d5a7 (fixed errors of cache)
 }
 
 bool npc_add_relation(long id, char const *name, size_t x, size_t y) {
@@ -225,8 +267,12 @@ bool npc_add_relation(long id, char const *name, size_t x, size_t y) {
     }
 
     auto &collection = *collection_ptr;
+<<<<<<< HEAD
     const std::string name_str(name);
     const auto poset_it = collection.find(name_str);
+=======
+    const auto poset_it = collection.find(name);
+>>>>>>> 376d5a7 (fixed errors of cache)
 
     if (poset_it == collection.end()) {
         return false;
@@ -234,22 +280,19 @@ bool npc_add_relation(long id, char const *name, size_t x, size_t y) {
 
     auto &rel = poset_it->second.relation;
 
-    // Relation already exists
     if (rel[x][y]) {
         return false;
     }
 
-    // Simulate adding relation and transitive closure
+    // Test if adding (x,y) preserves antisymmetry after closure.
     Relation temp_rel = rel;
     temp_rel[x].set(y);
     transitive_closure(temp_rel);
 
-    // Check if the result would be antisymmetric
     if (!is_antisymmetric(temp_rel)) {
         return false;
     }
 
-    // Accept changes
     rel = temp_rel;
     return true;
 }
@@ -265,8 +308,12 @@ bool npc_is_relation(long id, char const *name, size_t x, size_t y) {
     }
 
     auto &collection = *collection_ptr;
+<<<<<<< HEAD
     const std::string name_str(name);
     const auto poset_it = collection.find(name_str);
+=======
+    const auto poset_it = collection.find(name);
+>>>>>>> 376d5a7 (fixed errors of cache)
 
     if (poset_it == collection.end()) {
         return false;
@@ -286,8 +333,12 @@ bool npc_remove_relation(long id, char const *name, size_t x, size_t y) {
     }
 
     auto &collection = *collection_ptr;
+<<<<<<< HEAD
     const std::string name_str(name);
     const auto poset_it = collection.find(name_str);
+=======
+    const auto poset_it = collection.find(name);
+>>>>>>> 376d5a7 (fixed errors of cache)
 
     if (poset_it == collection.end()) {
         return false;
@@ -299,7 +350,7 @@ bool npc_remove_relation(long id, char const *name, size_t x, size_t y) {
         return false;
     }
 
-    // Check if intermediate element exists
+    // Can only remove direct edges (no intermediate path exists).
     for (size_t z = 0; z < N; ++z) {
         if (z != x && z != y && rel[x][z] && rel[z][y]) {
             return false;
