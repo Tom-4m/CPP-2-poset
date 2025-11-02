@@ -3,8 +3,6 @@
 
 #ifdef __cplusplus
 #include <cstddef>
-#include <cstdbool>
-
 extern "C" {
 namespace cxx {
 #else
@@ -52,8 +50,8 @@ size_t npc_poset_size();
 size_t npc_collection_size(long id);
 
 #ifdef __cplusplus
-}
-}
+} // namespace cxx
+} // extern "C"
 #endif
 
 #endif // NAMED_POSET_COLLECTIONS_H
