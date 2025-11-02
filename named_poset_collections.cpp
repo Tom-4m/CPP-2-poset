@@ -49,6 +49,14 @@ std::string &get_iterator_cache() {
     return cache;
 }
 
+// Finds a collection by ID
+PosetCollection *find_collection(long id) {
+    auto &collections = get_collections();
+    const auto it = collections.find(id);
+
+    return it == collections.end() ? nullptr : &it->second;
+}
+
 // Validates name correctness
 bool is_valid_name(char const *name) {
     if (name == nullptr || name[0] == '\0') {
@@ -90,8 +98,8 @@ bool is_antisymmetric(const Relation &rel) {
 }
 } // namespace
 
-namespace cxx {
 extern "C" {
+namespace cxx {
 
 long npc_new_collection() {
     long &next_id = get_next_id();
@@ -115,15 +123,13 @@ bool npc_new_poset(long id, char const *name) {
         return false;
     }
 
-    auto &collections = get_collections();
-    auto coll_it = collections.find(id);
-
-    if (coll_it == collections.end()) {
+    const auto collection_ptr = find_collection(id);
+    if (collection_ptr == nullptr) {
         return false;
     }
 
-    std::string name_str(name);
-    auto &collection = coll_it->second;
+    const std::string name_str(name);
+    auto &collection = *collection_ptr;
 
     if (collection.find(name_str) != collection.end()) {
         return false;
@@ -138,14 +144,12 @@ void npc_delete_poset(long id, char const *name) {
         return;
     }
 
-    auto &collections = get_collections();
-    auto coll_it = collections.find(id);
-
-    if (coll_it == collections.end()) {
+    const auto collection_ptr = find_collection(id);
+    if (collection_ptr == nullptr) {
         return;
     }
 
-    coll_it->second.erase(std::string(name));
+    collection_ptr->erase(std::string(name));
 }
 
 bool npc_copy_poset(long id, char const *name_dst, char const *name_src) {
@@ -153,36 +157,32 @@ bool npc_copy_poset(long id, char const *name_dst, char const *name_src) {
         return false;
     }
 
-    auto &collections = get_collections();
-    auto coll_it = collections.find(id);
-
-    if (coll_it == collections.end()) {
+    const auto collection_ptr = find_collection(id);
+    if (collection_ptr == nullptr) {
         return false;
     }
 
-    auto &collection = coll_it->second;
-    std::string src_str(name_src);
-    auto src_it = collection.find(src_str);
+    auto &collection = *collection_ptr;
+    const std::string src_str(name_src);
+    const auto src_it = collection.find(src_str);
 
     if (src_it == collection.end()) {
         return false;
     }
 
-    std::string dst_str(name_dst);
+    const std::string dst_str(name_dst);
     collection[dst_str] = src_it->second;
     return true;
 }
 
 char const *npc_first_poset(long id) {
-    auto &collections = get_collections();
-    auto coll_it = collections.find(id);
-
-    if (coll_it == collections.end() || coll_it->second.empty()) {
+    const auto collection_ptr = find_collection(id);
+    if (collection_ptr == nullptr || collection_ptr->empty()) {
         return nullptr;
     }
 
     // Cache the string to prevent dangling pointer
-    get_iterator_cache() = coll_it->second.begin()->first;
+    get_iterator_cache() = collection_ptr->begin()->first;
     return get_iterator_cache().c_str();
 }
 
@@ -191,28 +191,26 @@ char const *npc_next_poset(long id, char const *name) {
         return nullptr;
     }
 
-    auto &collections = get_collections();
-    auto coll_it = collections.find(id);
-
-    if (coll_it == collections.end()) {
+    const auto collection_ptr = find_collection(id);
+    if (collection_ptr == nullptr) {
         return nullptr;
     }
 
-    auto &collection = coll_it->second;
-    std::string name_str(name);
-    auto it = collection.find(name_str);
+    auto &collection = *collection_ptr;
+    const std::string name_str(name);
+    auto poset_it = collection.find(name_str);
 
-    if (it == collection.end()) {
+    if (poset_it  == collection.end()) {
         return nullptr;
     }
 
-    ++it;
-    if (it == collection.end()) {
+    ++poset_it ;
+    if (poset_it  == collection.end()) {
         return nullptr;
     }
 
     // Cache the string to prevent dangling pointer
-    get_iterator_cache() = it->first;
+    get_iterator_cache() = poset_it->first;
     return get_iterator_cache().c_str();
 }
 
@@ -221,16 +219,14 @@ bool npc_add_relation(long id, char const *name, size_t x, size_t y) {
         return false;
     }
 
-    auto &collections = get_collections();
-    auto coll_it = collections.find(id);
-
-    if (coll_it == collections.end()) {
+    const auto collection_ptr = find_collection(id);
+    if (collection_ptr == nullptr) {
         return false;
     }
 
-    auto &collection = coll_it->second;
-    std::string name_str(name);
-    auto poset_it = collection.find(name_str);
+    auto &collection = *collection_ptr;
+    const std::string name_str(name);
+    const auto poset_it = collection.find(name_str);
 
     if (poset_it == collection.end()) {
         return false;
@@ -263,16 +259,14 @@ bool npc_is_relation(long id, char const *name, size_t x, size_t y) {
         return false;
     }
 
-    auto &collections = get_collections();
-    auto coll_it = collections.find(id);
-
-    if (coll_it == collections.end()) {
+    const auto collection_ptr = find_collection(id);
+    if (collection_ptr == nullptr) {
         return false;
     }
 
-    auto &collection = coll_it->second;
-    std::string name_str(name);
-    auto poset_it = collection.find(name_str);
+    auto &collection = *collection_ptr;
+    const std::string name_str(name);
+    const auto poset_it = collection.find(name_str);
 
     if (poset_it == collection.end()) {
         return false;
@@ -286,16 +280,14 @@ bool npc_remove_relation(long id, char const *name, size_t x, size_t y) {
         return false;
     }
 
-    auto &collections = get_collections();
-    auto coll_it = collections.find(id);
-
-    if (coll_it == collections.end()) {
+    const auto collection_ptr = find_collection(id);
+    if (collection_ptr == nullptr) {
         return false;
     }
 
-    auto &collection = coll_it->second;
-    std::string name_str(name);
-    auto poset_it = collection.find(name_str);
+    auto &collection = *collection_ptr;
+    const std::string name_str(name);
+    const auto poset_it = collection.find(name_str);
 
     if (poset_it == collection.end()) {
         return false;
@@ -327,14 +319,14 @@ size_t npc_poset_size() {
 }
 
 size_t npc_collection_size(long id) {
-    auto &collections = get_collections();
-    auto coll_it = collections.find(id);
-
-    if (coll_it == collections.end()) {
+    const auto collection_ptr = find_collection(id);
+    if (collection_ptr == nullptr) {
         return 0;
     }
 
-    return coll_it->second.size();
-}
+    return collection_ptr->size();
 }
 } // namespace cxx
+}
+
+#undef N
